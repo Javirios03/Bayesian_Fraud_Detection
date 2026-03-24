@@ -1,0 +1,77 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{lmodern}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{mdframed}
+
+\definecolor{accentblue}{RGB}{24, 95, 165}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+
+\titleformat{\section}{\normalsize\bfseries\color{accentblue}}{}{0em}{}[\titlerule]
+
+\begin{document}
+
+\begin{center}
+    {\Large \textbf{Propuesta de Proyecto Final}}\\[4pt]
+    {\normalsize Inteligencia Artificial Probabilística — DCIA-MIA-521}\\[2pt]
+    {\small Máster Universitario en Inteligencia Artificial · Universidad Pontificia Comillas · 2025/2026}
+\end{center}
+
+\vspace{0.3cm}
+\begin{mdframed}[backgroundcolor=lightgray, linecolor=accentblue, linewidth=1pt, innertopmargin=6pt, innerbottommargin=6pt]
+    \textbf{Título:} Detección de Fraude Bancario mediante Redes Neuronales Bayesianas con Inferencia Variacional\\[3pt]
+    \textbf{Alumno:} \textit{Antonio Lorenzo Díaz-Meco - Francisco Javier Ríos Montes}\\[3pt]
+    \textbf{Dataset:} Credit Card Fraud Detection (Kaggle) — 284.807 transacciones reales, 0,17\% fraude
+\end{mdframed}
+
+\section{Problema y motivación}
+
+La detección de fraude en transacciones con tarjeta de crédito constituye un problema de clasificación binaria con desafíos probabilísticos inherentes: desbalanceo extremo de clases (1:578), ruido en las features y patrones de fraude en constante evolución. Los modelos deterministas clásicos producen estimaciones puntuales que impiden cuantificar la confianza de cada predicción, lo que limita su utilidad operativa en entornos donde las decisiones erróneas tienen costes asimétricos.
+
+Este proyecto propone un enfoque probabilístico basado en \textbf{Redes Neuronales Bayesianas} (BNN) con \textbf{inferencia variacional}, emitiendo una distribución predictiva completa $p(y \mid \mathbf{x})$ en lugar de una etiqueta puntual. La incertidumbre cuantificada se traduce directamente en valor de negocio: una transacción con alta incertidumbre \textit{epistémica} se deriva a revisión humana, reduciendo tanto falsos positivos como pérdidas por fraude no detectado.
+
+\section{Aproximación probabilística}
+
+El modelo aprende una distribución posterior sobre los pesos $p(\mathbf{W} \mid \mathcal{D})$, intratable en forma exacta. La inferencia se realiza mediante \textbf{inferencia variacional} (VI), aproximando el posterior con una familia gaussiana $q(\mathbf{W}; \boldsymbol{\phi})$ y maximizando la cota inferior de la evidencia (ELBO):
+
+\begin{equation}
+    \mathcal{L}(\boldsymbol{\phi}) = \mathbb{E}_{q}\bigl[\log p(\mathcal{D} \mid \mathbf{W})\bigr] - \mathrm{KL}\bigl[q(\mathbf{W};\boldsymbol{\phi}) \,\|\, p(\mathbf{W})\bigr]
+\end{equation}
+
+El prior $p(\mathbf{W}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ se justifica por la estandarización previa de las features. El desbalanceo de clases se incorpora como conocimiento experto en el prior del sesgo de la capa de salida: $b_0 = \log(0.0017 / 0.9983)$.
+
+La incertidumbre total sobre cada predicción se descompone en sus componentes \textit{aleatoria} (irreducible, ruido en los datos) y \textit{epistémica} (reducible, desconocimiento del modelo), estimadas mediante muestreo Monte Carlo del posterior aproximado.
+
+\section{Dataset y deficiencias realistas}
+
+El dataset contiene 29 features: 28 componentes PCA anonimizadas ($V_1, \ldots, V_{28}$), el importe (\texttt{Amount}, con distribución log-normal sesgada) y la marca temporal (\texttt{Time}). Se introducirán artificialmente datos faltantes en \texttt{Amount} y \texttt{Time} para demostrar la robustez del enfoque bayesiano frente a modelos deterministas de referencia.
+
+\section{Métricas y valor de negocio}
+
+\begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Tipo} & \textbf{Métrica}              & \textbf{Objetivo}                      \\
+    \midrule
+    Offline       & NLL, ECE, AUROC               & Calibración y capacidad discriminativa \\
+    Offline       & Brier Score                   & Calidad probabilística global          \\
+    Online        & Tasa de derivación a revisión & Reducción de costes operativos         \\
+    \bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+Se desarrollará una demo interactiva en \textbf{Streamlit} que permita visualizar $p(\text{fraude} \mid \mathbf{x})$ junto con las bandas de incertidumbre y el umbral de decisión ajustable en tiempo real.
+
+\section{Stack tecnológico}
+
+\textbf{PyMC} para el modelo bayesiano base; \textbf{Pyro / torch} para escalado con SVI sobre minibatches; \textbf{Streamlit} para la demo interactiva; \textbf{MLflow} para seguimiento de experimentos; \textbf{Docker} para reproducibilidad del entorno.
+
+\end{document}
