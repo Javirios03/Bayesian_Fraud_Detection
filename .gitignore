@@ -1,14 +1,7 @@
 # LaTex generated files
-*.aux
-*.lof
-*.lot
-*.fls
-*.out
-*.toc
-*.fdb_latexmk
-*.synctex.gz
-*.aux
-*.tex
+Reports/**
+!Reports/*.pdf
+!Reports/*.tex
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
