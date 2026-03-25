@@ -8,6 +8,7 @@
 *.fdb_latexmk
 *.synctex.gz
 *.aux
+*.tex
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
